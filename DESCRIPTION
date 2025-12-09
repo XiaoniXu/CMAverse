@@ -2,7 +2,7 @@ Package: CMAverse
 Type: Package
 Title: Causal Mediation Analysis
 Version: 0.1.0
-URL: https://bs1125.github.io/CMAverse/, https://github.com/BS1125/CMAverse
+URL: https://xiaonixu.github.io/CMAverse/, https://github.com/XiaoniXu/CMAverse
 Authors@R: c(
     person("Baoyi", "Shi", role = c("aut", "cre"), email = "bs3141@columbia.edu"),
     person("Ziqing", "Wang", role = c("aut", "crb"), email = "zw2899@cumc.columbia.edu"),
@@ -64,4 +64,4 @@ Suggests:
     covr
 VignetteBuilder: knitr
 Depends: R (>= 2.10)
-BugReports: https://github.com/BS1125/CMAverse/issues
+BugReports: https://github.com/XiaoniXu/CMAverse/issues
