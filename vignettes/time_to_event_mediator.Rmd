@@ -1,5 +1,6 @@
 ---
 title: "Statistical Modeling with Time-to-event Mediators and Competing Risks"
+author: "Xiaoni Xu"
 output: rmarkdown::html_vignette
 date: "`r Sys.Date()`"
 vignette: >
@@ -12,7 +13,7 @@ vignette: >
 
 We follow the framework of Arce Domingo-Relloso *et al.* (2024), who extend the mediational g-formula to accommodate longitudinal mediators and competing events in a single causal framework. In studies where both the mediator and competing risks evolve over time, traditional mediation estimators may fail to correctly identify path-specific effects. The approach implemented in `cmest_pathcomprisk` overcomes this challenge by modeling the structure—exposure, mediator history, competing event history, and survival process—and then evaluating the interventions through the g-formula.
 
-This example illustrates how to use `cmest_pathcomprisk` to estimate path-specific causal effects in settings where:
+This example illustrates how to use `pathcomprisk` to estimate path-specific causal effects in settings where:
 
 - the mediator is time-varying,
 - the outcome is a time-to-event variable, and
@@ -38,7 +39,7 @@ Under this framework, the total effect of an exposure on a time-to-event outcome
 
 Under the identification assumptions presented in Arce Domingo-Relloso et al. (2024), each path-specific effect can be expressed using the longitudinal mediational g-formula. The `cmest_pathcomprisk` function implements these estimands by specifying regression models for the exposure, mediator, competing event process, and time-to-event outcome; generating counterfactual trajectories under fixed exposure values; and computing the corresponding g-formula risk contrasts.
 
-In the remainder of this example, we construct a simplified dataset with a mediator measured at three time points, a competing event indicator also measured at three time points, and a time-to-event outcome. We then demonstrate how to estimate the four path-specific effects using `cmest_pathcomprisk`.
+In the remainder of this example, we construct a simplified dataset with a mediator measured at three time points, a competing event indicator also measured at three time points, and a time-to-event outcome. We then demonstrate how to estimate the four path-specific effects using `pathcomprisk`.
 
 
 ## Estimands
@@ -125,7 +126,7 @@ IED_{k+1}(a^\*, a) = \phi(a^\*,a^\*,a^\*) - \phi(a^\*,a,a^\*), \quad
 TE_{k+1}(a^\*, a) = \phi(a^\*,a^\*,a^\*) - \phi(a,a,a).
 \]
 
-The function `cmest_pathcomprisk()` implements a parametric mediational g-formula algorithm
+The function `pathcomprisk()` implements a parametric mediational g-formula algorithm
 tailored to time-varying mediators and competing risks:
 
 1. Choose two exposure levels \(a\) and \(a^\*\) (for example, the 25th and 75th percentiles of the
@@ -257,9 +258,60 @@ ggplot(dag_longi, aes(x = x, y = y, xend = xend, yend = yend)) +
 
 
 
-## `cmest_pathcomprisk` function
+## `pathcomprisk` function
 
-To easily implement this estimation procedure, this feature is available via the `cmest_pathcomprisk()` function. It automates the mediational g-formula for time-varying mediators and competing risks on the hazard scale.
+To easily implement this estimation procedure, this feature is available via the `pathcomprisk()` function. It automates the mediational g-formula for time-varying mediators and competing risks on the hazard scale.
+
+## Basic Usage Example
+
+Here is a basic example of how to use the `pathcomprisk()` function for time-to-event mediation analysis with competing risks:
+
+```r
+library(CMAverse)
+library(survival)
+library(timereg)
+library(data.table)
+
+# Fit mediator models (at each time point)
+M1 <- lm(M_1 ~ E + C, data = mydata)
+M2 <- lm(M_2 ~ E + M_1 + C, data = mydata)
+mreg_list <- list(M1, M2)
+
+# Fit competing risk models
+L1 <- glm(D1 ~ E + M_1 + C, data = mydata, family = binomial())
+L2 <- glm(D2 ~ E + M_2 + C, data = mydata, family = binomial())
+D_list <- list(L1, L2)
+
+# Fit outcome model (Aalen additive hazards model)
+Y <- timereg::aalen(
+  Surv(tstart, tstop, event) ~ const(E) + const(M) + const(C),
+  data = df_counted,
+  resample.iid = 1
+)
+
+# Define exposure levels
+a <- 1        # Active exposure value
+astar <- 0    # Reference exposure value
+
+# Estimate path-specific effects
+results <- pathcomprisk(
+  D = D_list,                    # Competing risk models
+  mreg = mreg_list,              # Mediator models
+  mvar = c("M_1", "M_2"),       # Mediator names
+  yreg = Y,                      # Outcome model
+  avar = "E",                    # Exposure name
+  a = a,                         # Active exposure
+  astar = astar,                 # Reference exposure
+  data = mydata,
+  time_points = c("1", "2"),    # Time points for mediators
+  peryr = 100000,                # Person-years divisor
+  nboot = 1000,                  # Bootstrap samples
+  refit = TRUE                   # Exact match bootstrapping
+)
+
+# View results
+summary(results)
+```
 
 ## Simulated data example
 

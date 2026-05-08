@@ -113,8 +113,9 @@
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Statistical Modeling with Time-to-event
 Mediators and Competing Risks</h1>
+                        <h4 data-toc-skip class="author">Xiaoni Xu</h4>
             
-            <h4 data-toc-skip class="date">2026-03-31</h4>
+            <h4 data-toc-skip class="date">2026-05-08</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/XiaoniXu/CMAverse/blob/HEAD/vignettes/time_to_event_mediator.Rmd" class="external-link"><code>vignettes/time_to_event_mediator.Rmd</code></a></small>
       <div class="hidden name"><code>time_to_event_mediator.Rmd</code></div>
@@ -133,8 +134,8 @@ path-specific effects. The approach implemented in
 structure—exposure, mediator history, competing event history, and
 survival process—and then evaluating the interventions through the
 g-formula.</p>
-<p>This example illustrates how to use <code>cmest_pathcomprisk</code>
-to estimate path-specific causal effects in settings where:</p>
+<p>This example illustrates how to use <code>pathcomprisk</code> to
+estimate path-specific causal effects in settings where:</p>
 <ul>
 <li>the mediator is time-varying,</li>
 <li>the outcome is a time-to-event variable, and</li>
@@ -191,7 +192,7 @@ corresponding g-formula risk contrasts.</p>
 with a mediator measured at three time points, a competing event
 indicator also measured at three time points, and a time-to-event
 outcome. We then demonstrate how to estimate the four path-specific
-effects using <code>cmest_pathcomprisk</code>.</p>
+effects using <code>pathcomprisk</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="estimands">Estimands<a class="anchor" aria-label="anchor" href="#estimands"></a>
@@ -318,9 +319,9 @@ $$</span> <span class="math display">$$
 IED_{k+1}(a^\*, a) = \phi(a^\*,a^\*,a^\*) - \phi(a^\*,a,a^\*), \quad
 TE_{k+1}(a^\*, a) = \phi(a^\*,a^\*,a^\*) - \phi(a,a,a).
 $$</span></p>
-<p>The function <code>cmest_pathcomprisk()</code> implements a
-parametric mediational g-formula algorithm tailored to time-varying
-mediators and competing risks:</p>
+<p>The function <code>pathcomprisk()</code> implements a parametric
+mediational g-formula algorithm tailored to time-varying mediators and
+competing risks:</p>
 <ol style="list-style-type: decimal">
 <li><p>Choose two exposure levels
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
@@ -470,13 +471,64 @@ risk process, as described in Domingo-Relloso et al. (2024).</p>
 <p><img src="time_to_event_mediator_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" width="700"></p>
 </div>
 <div class="section level2">
-<h2 id="cmest_pathcomprisk-function">
-<code>cmest_pathcomprisk</code> function<a class="anchor" aria-label="anchor" href="#cmest_pathcomprisk-function"></a>
+<h2 id="pathcomprisk-function">
+<code>pathcomprisk</code> function<a class="anchor" aria-label="anchor" href="#pathcomprisk-function"></a>
 </h2>
 <p>To easily implement this estimation procedure, this feature is
-available via the <code>cmest_pathcomprisk()</code> function. It
-automates the mediational g-formula for time-varying mediators and
-competing risks on the hazard scale.</p>
+available via the <code>pathcomprisk()</code> function. It automates the
+mediational g-formula for time-varying mediators and competing risks on
+the hazard scale.</p>
+</div>
+<div class="section level2">
+<h2 id="basic-usage-example">Basic Usage Example<a class="anchor" aria-label="anchor" href="#basic-usage-example"></a>
+</h2>
+<p>Here is a basic example of how to use the <code>pathcomprisk()</code>
+function for time-to-event mediation analysis with competing risks:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bs1125.github.io/CMAverse/" class="external-link">CMAverse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/scheike/timereg" class="external-link">timereg</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Fit mediator models (at each time point)</span></span>
+<span><span class="va">M1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">M_1</span> <span class="op">~</span> <span class="va">E</span> <span class="op">+</span> <span class="va">C</span>, data <span class="op">=</span> <span class="va">mydata</span><span class="op">)</span></span>
+<span><span class="va">M2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">M_2</span> <span class="op">~</span> <span class="va">E</span> <span class="op">+</span> <span class="va">M_1</span> <span class="op">+</span> <span class="va">C</span>, data <span class="op">=</span> <span class="va">mydata</span><span class="op">)</span></span>
+<span><span class="va">mreg_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">M1</span>, <span class="va">M2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Fit competing risk models</span></span>
+<span><span class="va">L1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">D1</span> <span class="op">~</span> <span class="va">E</span> <span class="op">+</span> <span class="va">M_1</span> <span class="op">+</span> <span class="va">C</span>, data <span class="op">=</span> <span class="va">mydata</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">L2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">D2</span> <span class="op">~</span> <span class="va">E</span> <span class="op">+</span> <span class="va">M_2</span> <span class="op">+</span> <span class="va">C</span>, data <span class="op">=</span> <span class="va">mydata</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">D_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">L1</span>, <span class="va">L2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Fit outcome model (Aalen additive hazards model)</span></span>
+<span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu">timereg</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/timereg/man/aalen.html" class="external-link">aalen</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">tstart</span>, <span class="va">tstop</span>, <span class="va">event</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/timereg/man/const.html" class="external-link">const</a></span><span class="op">(</span><span class="va">E</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/timereg/man/const.html" class="external-link">const</a></span><span class="op">(</span><span class="va">M</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/timereg/man/const.html" class="external-link">const</a></span><span class="op">(</span><span class="va">C</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">df_counted</span>,</span>
+<span>  resample.iid <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Define exposure levels</span></span>
+<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fl">1</span>        <span class="co"># Active exposure value</span></span>
+<span><span class="va">astar</span> <span class="op">&lt;-</span> <span class="fl">0</span>    <span class="co"># Reference exposure value</span></span>
+<span></span>
+<span><span class="co"># Estimate path-specific effects</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">pathcomprisk</span><span class="op">(</span></span>
+<span>  D <span class="op">=</span> <span class="va">D_list</span>,                    <span class="co"># Competing risk models</span></span>
+<span>  mreg <span class="op">=</span> <span class="va">mreg_list</span>,              <span class="co"># Mediator models</span></span>
+<span>  mvar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"M_1"</span>, <span class="st">"M_2"</span><span class="op">)</span>,       <span class="co"># Mediator names</span></span>
+<span>  yreg <span class="op">=</span> <span class="va">Y</span>,                      <span class="co"># Outcome model</span></span>
+<span>  avar <span class="op">=</span> <span class="st">"E"</span>,                    <span class="co"># Exposure name</span></span>
+<span>  a <span class="op">=</span> <span class="va">a</span>,                         <span class="co"># Active exposure</span></span>
+<span>  astar <span class="op">=</span> <span class="va">astar</span>,                 <span class="co"># Reference exposure</span></span>
+<span>  data <span class="op">=</span> <span class="va">mydata</span>,</span>
+<span>  time_points <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span><span class="op">)</span>,    <span class="co"># Time points for mediators</span></span>
+<span>  peryr <span class="op">=</span> <span class="fl">100000</span>,                <span class="co"># Person-years divisor</span></span>
+<span>  nboot <span class="op">=</span> <span class="fl">1000</span>,                  <span class="co"># Bootstrap samples</span></span>
+<span>  refit <span class="op">=</span> <span class="cn">TRUE</span>                   <span class="co"># Exact match bootstrapping</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># View results</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="simulated-data-example">Simulated data example<a class="anchor" aria-label="anchor" href="#simulated-data-example"></a>
@@ -484,7 +536,7 @@ competing risks on the hazard scale.</p>
 <p>We simulate the data using a simulated dataset created by Yuchen
 Zhang. The exact matching mode utilizes an inner bootstrap loop via the
 <code>refit = TRUE</code> logic to adequately capture variability.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bs1125.github.io/CMAverse/" class="external-link">CMAverse</a></span><span class="op">)</span> <span class="co"># or library(cmcrhazard) / library(cmmed)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/scheike/timereg" class="external-link">timereg</a></span><span class="op">)</span></span>
@@ -562,7 +614,7 @@ Zhang. The exact matching mode utilizes an inner bootstrap loop via the
 <span>  yreg_event <span class="op">=</span> <span class="st">"eventHappened"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>We can directly inspect the calculated effects:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span></span></code></pre></div>
 <pre><code>$DE
 [1] "116.04 (50.61, 184.85)"

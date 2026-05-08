@@ -1,5 +1,6 @@
 ---
 title: "Overview of Modeling Approaches for Causal Mediation Analysis"
+author: "Xiaoni Xu"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -60,6 +61,127 @@ Since weights calculated from noncategorical variables are unstable,
 which hurts the performance of effect estimation and inference, weighted
 approaches can be implemented only for categorical exposure and
 mediator(s).
+
+# CMAverse Function Parameters
+
+The `CMAverse` package provides a unified interface for conducting causal mediation analysis through several main functions. Users specify the statistical models and estimation approaches using the following key parameters:
+
+## Main Parameters
+
+**`yreg`** - Specifies the regression model for the outcome (Y). Options include:
+- `"linear"` - Linear regression
+- `"logistic"` - Logistic regression for binary outcomes  
+- `"loglinear"` - Log-linear regression for count data
+- `"poisson"` - Poisson regression for count outcomes
+- `"quasipoisson"` - Quasi-Poisson regression
+- `"negbin"` - Negative binomial regression
+- `"coxph"` - Cox proportional hazards model for survival outcomes
+- `"aft_exp"` - Accelerated failure time model with exponential distribution
+- `"aft_weibull"` - Accelerated failure time model with Weibull distribution
+
+**`mreg`** - Specifies the regression model(s) for the mediator(s) (M). Can be a list for multiple mediators. Options include:
+- `"linear"` - Linear regression
+- `"logistic"` - Logistic regression for binary mediators
+- `"multinomial"` - Multinomial regression for categorical mediators with more than 2 levels
+
+**`dreg`** - Specifies the regression model for the confounder model in weighted approaches. Used in inverse probability weighting to estimate treatment weights. Options include:
+- `"linear"` - Linear regression
+- `"logistic"` - Logistic regression for binary treatment/exposure
+
+**`ereg`** - Specifies the regression model for the outcome propensity in certain sensitivity analyses and weighted approaches.
+
+**`a`** - The treatment/exposure level of interest (active treatment value)
+
+**`astar`** - The reference treatment/exposure level (control value)
+
+**`m`** - The value at which to control the mediator (for controlled direct effects)
+
+**`basecval`** - A named list specifying baseline confounder values for conditional inference in closed-form parameter function estimation
+
+**`data`** - The dataset containing all variables
+
+## Additional Common Parameters
+
+**`nboot`** - Number of bootstrap samples for confidence interval estimation
+
+**`CI`** - Confidence level (e.g., 0.95 for 95% CI)
+
+**`boot.ci.type`** - Type of bootstrap confidence intervals ("perc", "normal", "basic", "bca")
+
+**`exposure`** - Name of the exposure/treatment variable
+
+**`mediators`** - Name(s) of the mediator variable(s)
+
+**`outcome`** - Name of the outcome variable
+
+**`covariates`** - Names of baseline confounders (C variables)
+
+**`postexposure_confounder`** - Names of post-exposure confounders affected by treatment (L variables)
+
+## Function-Specific Parameters
+
+For time-to-event analyses with competing risks:
+- **`pathcomprisk()`** - Implements the mediational g-formula for time-varying mediators and competing risks on the hazard scale
+  - `D` - List of competing risk/event models  
+  - `yreg` - The outcome model (typically Aalen or Cox model)
+  - `time_points` - Time points at which to evaluate mediators
+  - `peryr` - Person-years divisor for rates
+  - `refit` - Logical indicating whether to use exact match bootstrapping mode
+
+For causal mediation with multiple mediators:
+- **`cmest()`** - Main function for estimation with multiple sequential mediators
+- **`cmsens()`** - Sensitivity analysis for unmeasured confounding
+
+Users select combinations of these parameters based on their data structure and research question to implement the desired causal mediation analysis approach.
+
+# Basic Usage Example
+
+Here is a simple example of conducting causal mediation analysis using `CMAverse`:
+
+```r
+library(CMAverse)
+
+# Example: Regression-based mediation analysis with a continuous outcome
+# Suppose we have a dataset 'mydata' with:
+# - Exposure: A
+# - Mediator: M  
+# - Outcome: Y
+# - Confounders: C1, C2
+
+# Conduct mediation analysis with linear models
+result <- cmest(
+  data = mydata,
+  model = "rb",                          # regression-based approach
+  outcome = "Y",
+  exposure = "A",
+  mediator = "M",
+  basec = c("C1", "C2"),                 # baseline confounders
+  yreg = "linear",                       # outcome model: linear regression
+  mreg = "linear",                       # mediator model: linear regression
+  a = 1,                                 # treatment value (e.g., exposure = 1)
+  astar = 0,                             # control value (e.g., exposure = 0)
+  mval = 0,                              # mediator value for CDE
+  estimation = "paramfunc",              # closed-form parameter functions
+  inference = "bootstrap",               # bootstrap for confidence intervals
+  nboot = 1000                           # 1000 bootstrap samples
+)
+
+# View results
+summary(result)
+
+# For time-to-event outcomes with competing risks:
+# result <- pathcomprisk(
+#   D = list_of_competing_risk_models,
+#   mreg = list_of_mediator_models,
+#   mvar = c("M1", "M2"),
+#   yreg = aalen_cox_model,
+#   avar = "A",
+#   a = 1,
+#   astar = 0,
+#   data = mydata,
+#   nboot = 1000
+# )
+```
 
 # No Confounders Affected by the Exposure
 

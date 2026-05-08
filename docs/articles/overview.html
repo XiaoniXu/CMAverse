@@ -114,8 +114,9 @@
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Overview of Modeling Approaches for Causal
 Mediation Analysis</h1>
+                        <h4 data-toc-skip class="author">Xiaoni Xu</h4>
             
-            <h4 data-toc-skip class="date">2025-12-08</h4>
+            <h4 data-toc-skip class="date">2026-05-08</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/XiaoniXu/CMAverse/blob/HEAD/vignettes/overview.Rmd" class="external-link"><code>vignettes/overview.Rmd</code></a></small>
       <div class="hidden name"><code>overview.Rmd</code></div>
@@ -171,6 +172,145 @@ follows the temporal order.</p>
 which hurts the performance of effect estimation and inference, weighted
 approaches can be implemented only for categorical exposure and
 mediator(s).</p>
+<div class="section level2">
+<h2 id="cmaverse-function-parameters">CMAverse Function Parameters<a class="anchor" aria-label="anchor" href="#cmaverse-function-parameters"></a>
+</h2>
+<p>The <code>CMAverse</code> package provides a unified interface for
+conducting causal mediation analysis through several main functions.
+Users specify the statistical models and estimation approaches using the
+following key parameters:</p>
+<div class="section level3">
+<h3 id="main-parameters">Main Parameters<a class="anchor" aria-label="anchor" href="#main-parameters"></a>
+</h3>
+<p><strong><code>yreg</code></strong> - Specifies the regression model
+for the outcome (Y). Options include: - <code>"linear"</code> - Linear
+regression - <code>"logistic"</code> - Logistic regression for binary
+outcomes<br>
+- <code>"loglinear"</code> - Log-linear regression for count data -
+<code>"poisson"</code> - Poisson regression for count outcomes -
+<code>"quasipoisson"</code> - Quasi-Poisson regression -
+<code>"negbin"</code> - Negative binomial regression -
+<code>"coxph"</code> - Cox proportional hazards model for survival
+outcomes - <code>"aft_exp"</code> - Accelerated failure time model with
+exponential distribution - <code>"aft_weibull"</code> - Accelerated
+failure time model with Weibull distribution</p>
+<p><strong><code>mreg</code></strong> - Specifies the regression
+model(s) for the mediator(s) (M). Can be a list for multiple mediators.
+Options include: - <code>"linear"</code> - Linear regression -
+<code>"logistic"</code> - Logistic regression for binary mediators -
+<code>"multinomial"</code> - Multinomial regression for categorical
+mediators with more than 2 levels</p>
+<p><strong><code>dreg</code></strong> - Specifies the regression model
+for the confounder model in weighted approaches. Used in inverse
+probability weighting to estimate treatment weights. Options include: -
+<code>"linear"</code> - Linear regression - <code>"logistic"</code> -
+Logistic regression for binary treatment/exposure</p>
+<p><strong><code>ereg</code></strong> - Specifies the regression model
+for the outcome propensity in certain sensitivity analyses and weighted
+approaches.</p>
+<p><strong><code>a</code></strong> - The treatment/exposure level of
+interest (active treatment value)</p>
+<p><strong><code>astar</code></strong> - The reference
+treatment/exposure level (control value)</p>
+<p><strong><code>m</code></strong> - The value at which to control the
+mediator (for controlled direct effects)</p>
+<p><strong><code>basecval</code></strong> - A named list specifying
+baseline confounder values for conditional inference in closed-form
+parameter function estimation</p>
+<p><strong><code>data</code></strong> - The dataset containing all
+variables</p>
+</div>
+<div class="section level3">
+<h3 id="additional-common-parameters">Additional Common Parameters<a class="anchor" aria-label="anchor" href="#additional-common-parameters"></a>
+</h3>
+<p><strong><code>nboot</code></strong> - Number of bootstrap samples for
+confidence interval estimation</p>
+<p><strong><code>CI</code></strong> - Confidence level (e.g., 0.95 for
+95% CI)</p>
+<p><strong><code>boot.ci.type</code></strong> - Type of bootstrap
+confidence intervals (“perc”, “normal”, “basic”, “bca”)</p>
+<p><strong><code>exposure</code></strong> - Name of the
+exposure/treatment variable</p>
+<p><strong><code>mediators</code></strong> - Name(s) of the mediator
+variable(s)</p>
+<p><strong><code>outcome</code></strong> - Name of the outcome
+variable</p>
+<p><strong><code>covariates</code></strong> - Names of baseline
+confounders (C variables)</p>
+<p><strong><code>postexposure_confounder</code></strong> - Names of
+post-exposure confounders affected by treatment (L variables)</p>
+</div>
+<div class="section level3">
+<h3 id="function-specific-parameters">Function-Specific Parameters<a class="anchor" aria-label="anchor" href="#function-specific-parameters"></a>
+</h3>
+<p>For time-to-event analyses with competing risks: -
+<strong><code>pathcomprisk()</code></strong> - Implements the
+mediational g-formula for time-varying mediators and competing risks on
+the hazard scale - <code>D</code> - List of competing risk/event
+models<br>
+- <code>yreg</code> - The outcome model (typically Aalen or Cox model) -
+<code>time_points</code> - Time points at which to evaluate mediators -
+<code>peryr</code> - Person-years divisor for rates - <code>refit</code>
+- Logical indicating whether to use exact match bootstrapping mode</p>
+<p>For causal mediation with multiple mediators: -
+<strong><code><a href="../reference/cmest.html">cmest()</a></code></strong> - Main function for estimation
+with multiple sequential mediators -
+<strong><code><a href="../reference/cmsens.html">cmsens()</a></code></strong> - Sensitivity analysis for
+unmeasured confounding</p>
+<p>Users select combinations of these parameters based on their data
+structure and research question to implement the desired causal
+mediation analysis approach.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="basic-usage-example">Basic Usage Example<a class="anchor" aria-label="anchor" href="#basic-usage-example"></a>
+</h2>
+<p>Here is a simple example of conducting causal mediation analysis
+using <code>CMAverse</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bs1125.github.io/CMAverse/" class="external-link">CMAverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Example: Regression-based mediation analysis with a continuous outcome</span></span>
+<span><span class="co"># Suppose we have a dataset 'mydata' with:</span></span>
+<span><span class="co"># - Exposure: A</span></span>
+<span><span class="co"># - Mediator: M  </span></span>
+<span><span class="co"># - Outcome: Y</span></span>
+<span><span class="co"># - Confounders: C1, C2</span></span>
+<span></span>
+<span><span class="co"># Conduct mediation analysis with linear models</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cmest.html">cmest</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">mydata</span>,</span>
+<span>  model <span class="op">=</span> <span class="st">"rb"</span>,                          <span class="co"># regression-based approach</span></span>
+<span>  outcome <span class="op">=</span> <span class="st">"Y"</span>,</span>
+<span>  exposure <span class="op">=</span> <span class="st">"A"</span>,</span>
+<span>  mediator <span class="op">=</span> <span class="st">"M"</span>,</span>
+<span>  basec <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C1"</span>, <span class="st">"C2"</span><span class="op">)</span>,                 <span class="co"># baseline confounders</span></span>
+<span>  yreg <span class="op">=</span> <span class="st">"linear"</span>,                       <span class="co"># outcome model: linear regression</span></span>
+<span>  mreg <span class="op">=</span> <span class="st">"linear"</span>,                       <span class="co"># mediator model: linear regression</span></span>
+<span>  a <span class="op">=</span> <span class="fl">1</span>,                                 <span class="co"># treatment value (e.g., exposure = 1)</span></span>
+<span>  astar <span class="op">=</span> <span class="fl">0</span>,                             <span class="co"># control value (e.g., exposure = 0)</span></span>
+<span>  mval <span class="op">=</span> <span class="fl">0</span>,                              <span class="co"># mediator value for CDE</span></span>
+<span>  estimation <span class="op">=</span> <span class="st">"paramfunc"</span>,              <span class="co"># closed-form parameter functions</span></span>
+<span>  inference <span class="op">=</span> <span class="st">"bootstrap"</span>,               <span class="co"># bootstrap for confidence intervals</span></span>
+<span>  nboot <span class="op">=</span> <span class="fl">1000</span>                           <span class="co"># 1000 bootstrap samples</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># View results</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># For time-to-event outcomes with competing risks:</span></span>
+<span><span class="co"># result &lt;- pathcomprisk(</span></span>
+<span><span class="co">#   D = list_of_competing_risk_models,</span></span>
+<span><span class="co">#   mreg = list_of_mediator_models,</span></span>
+<span><span class="co">#   mvar = c("M1", "M2"),</span></span>
+<span><span class="co">#   yreg = aalen_cox_model,</span></span>
+<span><span class="co">#   avar = "A",</span></span>
+<span><span class="co">#   a = 1,</span></span>
+<span><span class="co">#   astar = 0,</span></span>
+<span><span class="co">#   data = mydata,</span></span>
+<span><span class="co">#   nboot = 1000</span></span>
+<span><span class="co"># )</span></span></code></pre></div>
+</div>
 <div class="section level2">
 <h2 id="no-confounders-affected-by-the-exposure">No Confounders Affected by the Exposure<a class="anchor" aria-label="anchor" href="#no-confounders-affected-by-the-exposure"></a>
 </h2>
